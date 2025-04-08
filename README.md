@@ -70,6 +70,10 @@ ids.release(id);
 
 // You can also reset all usage at once
 ids.reset();
+
+// Or remap all identifiers in your context at once with ephemeral persistence
+ids.remap([ '123456789', '987654321' ]);
+// { '123456789': 'Aa0a', '987654321': 'Bb1b' }
 ```
 
 ## Additional Usage Considerations

@@ -81,8 +81,12 @@ export class EphemeralIds {
 
   /**
    * Remaps a set of user identifiers to ephemeral identifiers.
-   * @param {string[]} ids - Array of user identifiers.
-   * @returns {Object<string, string>} - Mapping of user identifiers to ephemeral identifiers.
+   *
+   * Automatically releases any mappings no longer in use, and assigns
+   * new ephemeral IDs for any new inputs.
+   *
+   * @param {string[]} ids - Array of user identifiers to map.
+   * @returns {Object<string, string>} Mapping of input identifiers to ephemeral IDs.
    */
   remap(ids) {
     // Pass an array of real ids, returns a mapping to ephemeral ids, automatically creates and releases as needed
