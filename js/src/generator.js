@@ -23,6 +23,8 @@ const baseContexts = [
   { prefix: ': ', suffix: ',' },
   { prefix: ': ', suffix: '!' },
   { prefix: ' ', suffix: '-' },
+  { prefix: ' ', suffix: ';' },
+  { prefix: ' ', suffix: ':' },
 ];
 
 const altContexts = [
@@ -41,7 +43,7 @@ const altContexts = [
   { prefix: "Aa0a_", suffix: "_" },
 ];
 
-// Two-letter English words and pronoun-like starters to avoid
+// Two-letter English words and other more likely starters to avoid
 const banned = {
   "Aa": true, "Bb": true, "Cc": true, "Dd": true, "Ee": true, "Ff": true, "Gg": true,
   "Hh": true, "Ii": true, "Jj": true, "Kk": true, "Ll": true, "Mm": true, "Nn": true,
