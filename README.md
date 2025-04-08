@@ -2,7 +2,7 @@
 
 > **Short, fair, and tokenizer-smart identifiers for LLM workflows.**
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](#)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](#)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](#)
 [![Language](https://img.shields.io/badge/language-Node.js-yellow.svg)](#)
 
