@@ -1,0 +1,28 @@
+{
+  "name": "pv-ephemeral-ids",
+  "version": "0.1.0",
+  "description": "Short, fair, and tokenizer-smart identifiers for LLM workflows.",
+  "main": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepublishOnly": "cp ../README.md ./README.md"
+  },
+  "keywords": [
+    "llm",
+    "identifiers",
+    "tokenization",
+    "ephemeral",
+    "placeholder",
+    "uuid-alternative",
+    "context-tracking"
+  ],
+  "author": "Jan BOON (Kaetemi)",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}

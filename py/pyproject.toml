@@ -1,0 +1,12 @@
+[project]
+name = "pv-ephemeral-ids"
+version = "0.1.0"
+description = "Short, fair, and tokenizer-smart identifiers for LLM workflows."
+authors = [{ name = "Jan BOON (Kaetemi)" }]
+license = { text = "BSD-3-Clause" }
+readme = "README.md"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

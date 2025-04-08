@@ -1,0 +1,45 @@
+# Root-level ignores
+.DS_Store
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Node.js
+js/node_modules/
+js/.npm/
+js/.eslintcache
+js/coverage/
+js/dist/
+js/build/
+js/package-lock.json
+js/README.md
+
+# Python
+py/__pycache__/
+py/*.egg-info/
+py/dist/
+py/build/
+py/.mypy_cache/
+py/.pytest_cache/
+py/.venv/
+py/venv/
+py/env/
+py/.env
+py/.DS_Store
+
+# Virtualenv (if created at root)
+.venv/
+env/
+.venv.bak/
+
+# VSCode and JetBrains IDEs
+.vscode/
+.idea/
+
+# Mac and Linux system files
+Thumbs.db
+ehthumbs.db
+*.orig
+*~
