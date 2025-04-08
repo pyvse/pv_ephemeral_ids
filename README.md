@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](#)
 [![Language](https://img.shields.io/badge/language-Node.js-yellow.svg)](#)
 
-> **TL;DR**: Identifiers guaranteed to be exactly thee tokens length, all starting with a unique token, in the format `Aa0a`, with the last two tokens randomized upon allocation.
+> **TL;DR**: Identifiers guaranteed to be exactly thee tokens in length, each starting with a unique token, in the format `Aa0a`, with the last two tokens randomized upon allocation.
 
 ## Overview
 
