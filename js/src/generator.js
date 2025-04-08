@@ -36,9 +36,9 @@ const altContexts = [
   { prefix: " [", suffix: "]" },
   { prefix: " {", suffix: "}" },
   { prefix: " -", suffix: "-" },
-  { prefix: "Aa0a,", suffix: "-" },
+  { prefix: "Aa0a,", suffix: "," },
   { prefix: "Aa0a-", suffix: "-" },
-  { prefix: "Aa0a_", suffix: "-" },
+  { prefix: "Aa0a_", suffix: "_" },
 ];
 
 // Two-letter English words and pronoun-like starters to avoid
