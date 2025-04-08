@@ -24,5 +24,8 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.4.2"
   }
 }

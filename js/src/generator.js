@@ -2,6 +2,8 @@
 
 import { AutoTokenizer } from '@huggingface/transformers';
 
+const DEBUG_LOG = true;
+
 /**
  * Simple wrapper to extract token IDs without special tokens.
  */
@@ -20,6 +22,7 @@ const baseContexts = [
   { prefix: ': ', suffix: '.' },
   { prefix: ': ', suffix: ',' },
   { prefix: ': ', suffix: '!' },
+  { prefix: ' ', suffix: '-' },
 ];
 
 const altContexts = [
@@ -27,6 +30,11 @@ const altContexts = [
   { prefix: ' #', suffix: '' },
   { prefix: ' "', suffix: '"' },
   { prefix: " '", suffix: "'" },
+  { prefix: " (", suffix: ")" },
+  { prefix: " <", suffix: ">" },
+  { prefix: " [", suffix: "]" },
+  { prefix: " {", suffix: "}" },
+  { prefix: " -", suffix: "-" },
 ];
 
 // Two-letter English words and pronoun-like starters to avoid
@@ -46,6 +54,19 @@ const alphaUpper = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 +
 const alphaLower = Array.from({ length: 26 }, (_, i) => String.fromCharCode(97 + i)); // a-z
 const numeric = Array.from({ length: 10 }, (_, i) => i.toString()); // 0-9
 
+function containsTriple(tokens, triple) {
+  for (let i = 0; i <= tokens.length - 3; i++) {
+    if (
+      tokens[i] === triple[0] &&
+      tokens[i + 1] === triple[1] &&
+      tokens[i + 2] === triple[2]
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Generates a map of valid identifier starters to randomized suffixes.
  *
@@ -57,48 +78,56 @@ const numeric = Array.from({ length: 10 }, (_, i) => i.toString()); // 0-9
 export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
   const tokenizer = await AutoTokenizer.from_pretrained(modelRepo);
 
-  // Reference tokens for alignment
+  // Reference tokens for base and alt prefix contexts
   const baseTokens = tokenize(tokenizer, prefix ? `${baseText} ${prefix}` : baseText);
-  const altTokensCheck = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}`);
+  const altTokens = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}`);
 
-  // Ensure that alt context still starts with base tokens
-  if (!altTokensCheck.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])) {
+  // Check that alt context begins the same as base (sanity)
+  if (!altTokens.slice(0, prefix ? (baseTokens.length - 1) : baseTokens.length).every((t, i) => t === baseTokens[i])) {
     throw new Error("Alt context token mismatch with base token prefix.");
   }
 
   const result = {};
 
-  // Iterate over all possible two-letter starters (Aa, Ab, ..., Zz)
+  // Try all two-letter starters
   for (let au of alphaUpper) {
     for (let al of alphaLower) {
       const starter = au + al;
       if (banned[starter]) continue;
 
-      // Tokenize prefix + starter in both base and alt punctuation contexts
       const testBase = tokenize(tokenizer, `${baseText} ${prefix}${starter}`);
       const testAlt = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}${starter}`);
 
-      // Ensure both tokenize to exactly 1 token after base, and match base
+      // Validate structure and prefix tokens
       if (
         testBase.length !== baseTokens.length + 1 ||
-        testAlt.length !== baseTokens.length + 1 ||
-        !testBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i]) ||
-        !testAlt.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
+        !testBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
       ) {
+        if (DEBUG_LOG) console.log(`Base starter mismatch for ${starter}: tokens ${testBase}`);
+        continue;
+      }
+
+      if (
+        testAlt.length !== altTokens.length + 1 ||
+        !testAlt.slice(0, altTokens.length).every((t, i) => t === altTokens[i])
+      ) {
+        if (DEBUG_LOG) console.log(`Alt starter mismatch for ${starter}: tokens ${testAlt}`);
         continue;
       }
 
       const baseStarterToken = testBase.at(-1);
       const altStarterToken = testAlt.at(-1);
 
-      // If we have a prefix, then these should be identical
-      if (prefix.length && baseStarterToken !== altStarterToken) {
+      // If a prefix is used, the starter token should be identical across contexts
+      if (prefix && baseStarterToken !== altStarterToken) {
+        if (DEBUG_LOG) {
+          console.log(`Token mismatch for ${starter}: base ${baseStarterToken}, alt ${altStarterToken}`);
+        }
         continue;
       }
 
       const suffixes = [];
 
-      // Test all digit+lowercase combos (e.g. 0a, 1b, ..., 9z)
       for (let digit of numeric) {
         for (let lower of alphaLower) {
           const fullId = starter + digit + lower;
@@ -106,41 +135,67 @@ export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
           const fullBase = tokenize(tokenizer, `${baseText} ${prefix}${fullId}`);
           const fullAlt = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}${fullId}`);
 
-          const expectedLen = baseTokens.length + 2;
+          const basePrefixLen = testBase.length;
+          const altPrefixLen = testAlt.length;
+
           if (
-            fullBase.length !== expectedLen ||
-            fullAlt.length !== expectedLen ||
-            !fullBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i]) ||
-            !fullAlt.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
+            fullBase.length !== basePrefixLen + 2 ||
+            fullAlt.length !== altPrefixLen + 2 ||
+            !fullBase.slice(0, basePrefixLen).every((t, i) => t === testBase[i]) ||
+            !fullAlt.slice(0, altPrefixLen).every((t, i) => t === testAlt[i])
           ) {
+            if (DEBUG_LOG) {
+              console.log(`Tokenization mismatch for ${fullId}: base ${fullBase}, alt ${fullAlt}`);
+            }
             continue;
           }
 
-          // Extract and verify token triplets
-          const tripleBase = fullBase.slice(-3);
-          const tripleAlt = fullAlt.slice(-3);
+          // Extract the token triples correctly, after the known prefix
+          const tripleBase = fullBase.slice(basePrefixLen - 1, basePrefixLen + 3);
+          const tripleAlt = fullAlt.slice(altPrefixLen - 1, altPrefixLen + 3);
 
-          // The starter tokens in both contexts must match previously observed tokens
+          if (tripleBase.length !== 3 || tripleAlt.length !== 3) {
+            if (DEBUG_LOG) {
+              console.log(`Incomplete triple for ${fullId}: base ${tripleBase}, alt ${tripleAlt}`);
+            }
+            continue;
+          }
+
           if (
             tripleBase[0] !== baseStarterToken ||
             tripleAlt[0] !== altStarterToken
           ) {
+            if (DEBUG_LOG) {
+              console.log(`Starter token mismatch for ${fullId}: base ${tripleBase[0]}, alt ${tripleAlt[0]}`);
+            }
             continue;
           }
 
-          // Verify stability across all test contexts
           let valid = true;
-          for (const ctx of [...baseContexts, ...altContexts]) {
+
+          // Validate against all base contexts
+          for (const ctx of baseContexts) {
             const contextTokens = tokenize(tokenizer, `${baseText}${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
-            const triplet = contextTokens.slice(-3);
-            if (
-              triplet.length !== 3 ||
-              triplet[0] !== baseStarterToken ||
-              triplet[1] !== tripleBase[1] ||
-              triplet[2] !== tripleBase[2]
-            ) {
+            if (!containsTriple(contextTokens, tripleBase)) {
               valid = false;
+              if (DEBUG_LOG) {
+                console.log(`Base context mismatch for ${fullId}: ${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
+              }
               break;
+            }
+          }
+
+          // Validate against all alt contexts
+          if (valid) {
+            for (const ctx of altContexts) {
+              const contextTokens = tokenize(tokenizer, `${baseText}${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
+              if (!containsTriple(contextTokens, tripleAlt)) {
+                valid = false;
+                if (DEBUG_LOG) {
+                  console.log(`Alt context mismatch for ${fullId}: ${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
+                }
+                break;
+              }
             }
           }
 
