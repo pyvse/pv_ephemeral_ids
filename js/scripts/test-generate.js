@@ -1,7 +1,7 @@
 /* js/scripts/test-generate.js */
 
 import { generateIdMap } from '../src/generator.js';
-import fs from 'fs';
+// import fs from 'fs';
 
 // const MODEL = 'tiiuae/falcon-7b'; // or any other HF-compatible model
 const MODEL = 'deepseek-ai/DeepSeek-V3-Base';
