@@ -1,7 +1,7 @@
 /* js/src/generator.js */
 
 const DEBUG_LOG = false;
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 
 import { AutoTokenizer } from '@huggingface/transformers';
 
@@ -81,9 +81,11 @@ const altContexts = [
   { prefix: " [", suffix: "]" },
   { prefix: " {", suffix: "}" },
   { prefix: " -", suffix: "-" },
-  { prefix: "Aa0a,", suffix: "," },
-  { prefix: "Aa0a-", suffix: "-" },
-  { prefix: "Aa0a_", suffix: "_" },
+  { prefix: " ,", suffix: "," },
+  { prefix: " _", suffix: "_" },
+  // { prefix: " Aa0a,", suffix: "," }, // These are weird under DeepSeek-V3 tokenizer
+  // { prefix: " Aa0a-", suffix: "-" },
+  // { prefix: " Aa0a_", suffix: "_" },
 ];
 
 // Two-letter English words and other more likely starters to avoid
@@ -262,7 +264,7 @@ export async function generateIdMap(modelRepo, { prefix = '', long = false, cach
                 if (!containsTriple(contextTokens, tripleAlt)) {
                   valid = false;
                   if (DEBUG_LOG) {
-                    console.log(`Alt context mismatch for ${fullId}: ${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
+                    console.log(`Alt context mismatch for ${fullId}: ${ctx.prefix}${prefix}${fullId}${ctx.suffix}, tokens ${contextTokens}, triple ${tripleAlt}`);
                   }
                   break;
                 }
