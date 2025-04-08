@@ -55,6 +55,7 @@ If you are using a continuous windowed context, you should allocate identifiers 
 
 ## Project Structure
 
+```
 pv_ephemeral_ids/
 ├── js/                         # Node.js implementation
 │   ├── src/
@@ -77,6 +78,7 @@ pv_ephemeral_ids/
 ├── .gitignore
 ├── LICENSE.md
 ├── README.md                   # Main project README
+```
 
 ## License
 
