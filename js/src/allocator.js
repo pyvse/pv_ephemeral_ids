@@ -9,12 +9,21 @@ export class EphemeralIds {
    */
   constructor(idMap) {
     this.idMap = idMap;
+    this.reset();
 
+    if (this.numAvailable === 0) {
+        throw new Error('No available identifiers.');
+    }
+
+    // Length of the starter tokens
+    this.starterLength = this.starters[0].length;
+  }
+
+  reset() {
     // Create an array of all the available starter tokens
-    this.starters = Object.keys(idMap);
-    this.numAvailable = this.starters.length; // Number of non-allocated identifiers
-    this.starterLength = this.starters[0].length; // Length of the starter tokens
-    
+    this.starters = [...Object.keys(this.idMap)];
+    this.numAvailable = this.starters.length;
+
     // Set of active identifiers
     this.activeIds = new Set();
   }

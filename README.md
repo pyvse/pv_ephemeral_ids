@@ -49,6 +49,29 @@ This library includes a utility to scan a tokenizer for all valid identifiers th
 
 For usage, an ID allocator is implemented to manage identifiers which are actively in use in the current context. It ensures that all active identifiers have a different starting token, and that the remaining tokens are randomly cycled when the starting token gets recycled.
 
+## Usage
+
+```js
+import { EphemeralIds } from 'pv-ephemeral-ids';
+
+const ids = await EphemeralIds.fromRepo('deepseek-ai/DeepSeek-V3-Base', {
+  prefix: '',    // Optional: 1-token prefix (e.g. 'Id')
+  long: false,   // Optional: use 3-character starters
+  cache: true    // Optional: cache ID patterns locally
+});
+
+// Get a new temporary identifier (e.g. "Aa0a")
+const id = ids.create();
+console.log(`Identifier: ${id}`);
+
+// When you're done using an identifier (e.g. a message has exited the context),
+// return it so it can be reused later with another randomized suffix
+ids.release(id);
+
+// You can also reset all usage at once
+ids.reset();
+```
+
 ## Additional Usage Considerations
 
 If you are using a continuous windowed context, you should allocate identifiers as they enter the context window, and deallocate them as soon as the last reference exits the context window, rather than rebuilding your context with new identifiers each run, in order to ensure your context can be cached.
