@@ -72,7 +72,7 @@ function containsTriple(tokens, triple) {
  *
  * @param {string} modelRepo - Hugging Face tokenizer repo name (e.g. "meta-llama/Llama-3.2-3B").
  * @param {Object} [options]
- * @param {string} [options.prefix] - Optional prefix to prepend to identifiers.
+ * @param {string} [options.prefix] - Optional prefix to prepend to identifiers. Must be exactly one token in length.
  * @returns {Promise<Object<string, string[]>>} Map of identifier prefix -> list of suffixes.
  */
 export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
