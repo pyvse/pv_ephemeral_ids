@@ -47,6 +47,7 @@ const banned = {
   "Go": true, "He": true, "If": true, "In": true, "Is": true, "It": true, "Me": true,
   "My": true, "No": true, "Of": true, "On": true, "Or": true, "So": true, "To": true,
   "Up": true, "Us": true, "We": true,
+  "Id": true,
 };
 
 // Alphabet and numeric components
