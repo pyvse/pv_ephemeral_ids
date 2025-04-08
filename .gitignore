@@ -16,6 +16,7 @@ js/build/
 js/package-lock.json
 js/README.md
 js/scripts/id_map.txt
+js/.cache/
 
 # Python
 py/__pycache__/

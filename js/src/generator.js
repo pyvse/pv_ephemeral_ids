@@ -1,8 +1,51 @@
 /* js/src/generator.js */
 
+const DEBUG_LOG = false;
+const CACHE_VERSION = 1;
+
 import { AutoTokenizer } from '@huggingface/transformers';
 
-const DEBUG_LOG = true;
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function getCacheDir() {
+  return path.join(__dirname, '..', '.cache', 'pv-ephemeral-ids');
+}
+
+function sanitize(name) {
+  return name.replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
+function makeCacheKey(modelRepo, prefix = '', long = false) {
+  const parts = [
+    `model-${sanitize(modelRepo.replace('/', '--'))}`,
+    prefix ? `prefix-${sanitize(prefix)}` : null,
+    long ? `long-true` : null,
+    `v${CACHE_VERSION}`
+  ].filter(Boolean);
+  return parts.join('--') + '.json';
+}
+
+async function tryLoadCache(modelRepo, prefix, long) {
+  const file = path.join(getCacheDir(), makeCacheKey(modelRepo, prefix, long));
+  try {
+    const content = await fs.readFile(file, 'utf-8');
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+}
+
+async function saveCache(modelRepo, prefix, long, data) {
+  const dir = getCacheDir();
+  await fs.mkdir(dir, { recursive: true });
+  const file = path.join(dir, makeCacheKey(modelRepo, prefix, long));
+  await fs.writeFile(file, JSON.stringify(data), 'utf-8');
+}
 
 /**
  * Simple wrapper to extract token IDs without special tokens.
@@ -88,9 +131,18 @@ function containsTriple(tokens, triple) {
  * @param {Object} [options]
  * @param {string} [options.prefix] - Optional prefix to prepend to identifiers. Must be exactly one token in length.
  * @param {string} [options.long] - Use three character starters instead of two.
+ * @param {boolean} [options.cache] - Enable caching of the generated ID map.
  * @returns {Promise<Object<string, string[]>>} Map of identifier prefix -> list of suffixes.
  */
-export async function generateIdMap(modelRepo, { prefix = '', long = false } = {}) {
+export async function generateIdMap(modelRepo, { prefix = '', long = false, cache = true } = {}) {
+  if (cache) {
+    const cached = await tryLoadCache(modelRepo, prefix, long);
+    if (cached) {
+      if (DEBUG_LOG) console.log(`✅ Loaded ID map from cache`);
+      return cached;
+    }
+  }
+
   const tokenizer = await AutoTokenizer.from_pretrained(modelRepo);
 
   // Reference tokens for base and alt prefix contexts
@@ -228,6 +280,11 @@ export async function generateIdMap(modelRepo, { prefix = '', long = false } = {
         }
       }
     }
+  }
+
+  if (cache) {
+    await saveCache(modelRepo, prefix, long, result);
+    if (DEBUG_LOG) console.log(`💾 Saved ID map to cache`);
   }
 
   return result;
