@@ -112,7 +112,7 @@ export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
         testBase.length !== baseTokens.length + 1 ||
         !testBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
       ) {
-        if (DEBUG_LOG) console.log(`Base starter mismatch for ${starter}: tokens ${testBase}`);
+        if (DEBUG_LOG) console.log(`Base starter mismatch for ${starter}: tokens ${testBase}, ref ${baseTokens}`);
         continue;
       }
 
@@ -120,7 +120,7 @@ export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
         testAlt.length !== altTokens.length + 1 ||
         !testAlt.slice(0, altTokens.length).every((t, i) => t === altTokens[i])
       ) {
-        if (DEBUG_LOG) console.log(`Alt starter mismatch for ${starter}: tokens ${testAlt}`);
+        if (DEBUG_LOG) console.log(`Alt starter mismatch for ${starter}: tokens ${testAlt}, ref ${altTokens}`);
         continue;
       }
 
