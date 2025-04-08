@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](#)
 [![Language](https://img.shields.io/badge/language-Node.js-yellow.svg)](#)
 
+> **TL;DR**: Identifiers guaranteed to be exactly thee tokens length, all starting with a unique token, in the format `Aa0a`, with the last two tokens randomized upon allocation.
+
 ## Overview
 
 LLM applications often need lightweight, temporary identifiers—for messages, references, entities, or variables—that are short, distinct, and play nicely with tokenizers. Traditional solutions like UUIDs or snowflakes are overkill in size and tend to introduce bias: UUIDs waste tokens, and snowflakes often begin with similar digits, leading to uneven sampling or attention.

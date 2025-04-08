@@ -3,12 +3,12 @@
 import { generateIdMap } from '../src/generator.js';
 import fs from 'fs';
 
-const MODEL = 'tiiuae/falcon-7b'; // or any other HF-compatible model
-// const MODEL = 'deepseek-ai/DeepSeek-V3-Base';
+// const MODEL = 'tiiuae/falcon-7b'; // or any other HF-compatible model
+const MODEL = 'deepseek-ai/DeepSeek-V3-Base';
 
 console.log(`Testing ID generation with model: ${MODEL}`);
 
-const result = await generateIdMap(MODEL, { prefix: 'Id' });
+const result = await generateIdMap(MODEL, { prefix: 'Id', long: true });
 
 // Print the number of valid starters and a preview
 const starters = Object.keys(result);
