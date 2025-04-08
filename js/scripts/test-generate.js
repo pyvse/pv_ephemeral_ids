@@ -8,7 +8,7 @@ const MODEL = 'tiiuae/falcon-7b'; // or any other HF-compatible model
 
 console.log(`Testing ID generation with model: ${MODEL}`);
 
-const result = await generateIdMap(MODEL, { prefix: '' });
+const result = await generateIdMap(MODEL, { prefix: 'Id' });
 
 // Print the number of valid starters and a preview
 const starters = Object.keys(result);

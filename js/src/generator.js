@@ -83,8 +83,10 @@ export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
   const altTokens = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}`);
 
   // Check that alt context begins the same as base (sanity)
-  if (!altTokens.slice(0, prefix ? (baseTokens.length - 1) : baseTokens.length).every((t, i) => t === baseTokens[i])) {
-    throw new Error("Alt context token mismatch with base token prefix.");
+  const partialAltTokens = altTokens.slice(0, prefix ? (baseTokens.length - 1) : baseTokens.length);
+  if (!partialAltTokens.every((t, i) => t === baseTokens[i])) {
+    // May fail if prefix is more than one token, or if the tokenizer is weird
+    throw new Error(`Base and alt contexts do not match: ${baseText}${altContexts[0].prefix}${prefix}, ${baseTokens}, ${altTokens}, ${partialAltTokens}, prefix might be more than one token, or tokenizer is weird`);
   }
 
   const result = {};
