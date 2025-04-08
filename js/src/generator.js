@@ -1,4 +1,4 @@
-/* generator.js */
+/* js/src/generator.js */
 
 import { AutoTokenizer } from '@huggingface/transformers';
 

@@ -1,4 +1,4 @@
-/* test-generate.js */
+/* js/scripts/test-generate.js */
 
 import { generateIdMap } from '../src/generator.js';
 import fs from 'fs';
