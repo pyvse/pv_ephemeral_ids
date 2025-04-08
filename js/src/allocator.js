@@ -116,6 +116,11 @@ export class EphemeralIds {
     return result;
   }
 
+  // NOTE: Could also add `map` and `unmap` methods, but the use case doesn't make sense,
+  // since the user won't be tracking their references to ever unmap the identifiers.
+  // In which case they'd have to iterate their whole active state anyway to find unused ones,
+  // or just reset the whole thing. Maybe just `map` makes sense
+
   /**
    * Async factory method to create an EphemeralIds instance from a model repo.
    * @param {string} modelRepo - Hugging Face model repo
