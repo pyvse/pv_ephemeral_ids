@@ -70,11 +70,27 @@ ids.release(id);
 
 // You can also reset all usage at once
 ids.reset();
-
-// Or remap all identifiers in your context at once with ephemeral persistence
-ids.remap([ '123456789', '987654321' ]);
-// { '123456789': 'Aa0a', '987654321': 'Bb1b' }
 ```
+
+### Remapping Real IDs
+
+If you're tracking IDs like message or user IDs in a rolling context (e.g. a chat or windowed replay):
+
+```js
+// Provide all the real IDs currently in the model context
+const realIds = ['123456789', '987654321'];
+
+// Map them to ephemeral placeholders
+const mapping = ids.remap(realIds);
+console.log(mapping);
+// → { '123456789': 'Aa0a', '987654321': 'Bb1b' }
+```
+
+The remapper:
+
+- Assigns a unique ephemeral ID to each real ID
+- Reuses existing mappings when possible
+- Automatically releases ephemeral IDs that are no longer needed
 
 ## Additional Usage Considerations
 
