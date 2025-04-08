@@ -26,6 +26,9 @@ export class EphemeralIds {
 
     // Set of active identifiers
     this.activeIds = new Set();
+
+    // Remapped user identifiers to ephemeral identifiers
+    this.remapped = new Map();
   }
 
   /**
@@ -74,6 +77,39 @@ export class EphemeralIds {
     const starter = id.slice(0, this.starterLength);
     this.starters[this.numAvailable] = starter;
     this.numAvailable++;
+  }
+
+  /**
+   * Remaps a set of user identifiers to ephemeral identifiers.
+   * @param {string[]} ids - Array of user identifiers.
+   * @returns {Object<string, string>} - Mapping of user identifiers to ephemeral identifiers.
+   */
+  remap(ids) {
+    // Pass an array of real ids, returns a mapping to ephemeral ids, automatically creates and releases as needed
+
+    // First release any ids that are no longer used
+    const used = new Set(ids);
+    for (const [key, value] of this.remapped.entries()) {
+      if (!used.has(key)) {
+        this.release(this.remapped[key]);
+        this.remapped.delete(key);
+      }
+    }
+
+    // Now create any new ids that are needed
+    for (const id of ids) {
+      if (!this.remapped.has(id)) {
+        const ephemeralId = this.create();
+        this.remapped.set(id, ephemeralId);
+      }
+    }
+
+    // Return the mapping
+    const result = {};
+    for (const [key, value] of this.remapped.entries()) {
+      result[key] = value;
+    }
+    return result;
   }
 
   /**

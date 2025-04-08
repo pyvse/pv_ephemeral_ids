@@ -15,6 +15,15 @@ for (let i = 0; i < Object.keys(ephemeralIds.idMap).length; i++) {
   console.log(`Allocated ID: ${id}`);
 }
 
+ephemeralIds.reset();
+
+console.log(ephemeralIds.remap([ '1', '2', '3', '4' ]));
+console.log(ephemeralIds.remap([ '1', '2', '3', '4' ]));
+console.log(ephemeralIds.remap([ '1', '2' ]));
+console.log(ephemeralIds.remap([ '1', '2', '3', '4' ]));
+console.log(ephemeralIds.remap([ '1', '2', '3', '4', '5' ]));
+console.log(ephemeralIds.remap([ '1', '2' ]));
+
 console.log(`\n...done.`);
 
 /* end of file */
