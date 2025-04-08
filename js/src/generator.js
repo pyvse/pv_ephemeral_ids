@@ -2,30 +2,34 @@
 
 import { AutoTokenizer } from '@huggingface/transformers';
 
+/**
+ * Simple wrapper to extract token IDs without special tokens.
+ */
 function tokenize(tokenizer, text) {
-  // Wrapper to simplify tokenization
   const encoded = tokenizer(text, { add_special_tokens: false });
-  const tokens = Array.from(encoded.input_ids.data, x => Number(x));
-  return tokens;
+  return Array.from(encoded.input_ids.data, x => Number(x));
 }
 
-// Test routine
+// Base sentence for token alignment sanity checks
 const baseText = "Test Test";
-const baseContexts = [ // Context with leading whitespace
+
+// Test contexts with/without leading whitespace and punctuation
+const baseContexts = [
   { prefix: ' ', suffix: '' },
   { prefix: ': ', suffix: '' },
   { prefix: ': ', suffix: '.' },
   { prefix: ': ', suffix: ',' },
   { prefix: ': ', suffix: '!' },
 ];
-const altContexts = [ // Contexts without leading whitespace
+
+const altContexts = [
   { prefix: ' @', suffix: '' },
   { prefix: ' #', suffix: '' },
   { prefix: ' "', suffix: '"' },
   { prefix: " '", suffix: "'" },
 ];
 
-// Banned identifiers
+// Two-letter English words and pronoun-like starters to avoid
 const banned = {
   "Aa": true, "Bb": true, "Cc": true, "Dd": true, "Ee": true, "Ff": true, "Gg": true,
   "Hh": true, "Ii": true, "Jj": true, "Kk": true, "Ll": true, "Mm": true, "Nn": true,
@@ -37,79 +41,117 @@ const banned = {
   "Up": true, "Us": true, "We": true,
 };
 
-const alphaUpper = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G',
-  'H', 'I', /* etc TODO */
-];
-
-const alphaLower = [
-  'a', 'b', 'c', 'd', 'e', /* etc TODO */
-];
-
-const numeric = [
-  '0', '1', '2', /* etc TODO */
-]
+// Alphabet and numeric components
+const alphaUpper = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A-Z
+const alphaLower = Array.from({ length: 26 }, (_, i) => String.fromCharCode(97 + i)); // a-z
+const numeric = Array.from({ length: 10 }, (_, i) => i.toString()); // 0-9
 
 /**
  * Generates a map of valid identifier starters to randomized suffixes.
  *
- * @param {string} modelRepo - The Hugging Face model repo name (e.g., "meta-llama/Llama-3.2-3B").
+ * @param {string} modelRepo - Hugging Face tokenizer repo name (e.g. "meta-llama/Llama-3.2-3B").
  * @param {Object} [options]
- * @param {string} [options.prefix] - Optional string prefix to prepend to identifiers.
- * @returns {Promise<Object<string, string[]>>} - A Promise that resolves to an object like: { "Aa": ["0a", ...], ... }
+ * @param {string} [options.prefix] - Optional prefix to prepend to identifiers.
+ * @returns {Promise<Object<string, string[]>>} Map of identifier prefix -> list of suffixes.
  */
 export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
-  // Load tokenizer from Hugging Face repo
   const tokenizer = await AutoTokenizer.from_pretrained(modelRepo);
 
-  const baseTokens = tokenize(tokenizer, prefix.length ? (baseText + ' ' + prefix) : baseText); // All test outputs should start with these tokens
-  const altTokensCheck = tokenize(tokenizer, baseText + altContexts[0].prefix + prefix); // Should start with baseTokens
+  // Reference tokens for alignment
+  const baseTokens = tokenize(tokenizer, prefix ? `${baseText} ${prefix}` : baseText);
+  const altTokensCheck = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}`);
 
-  // Check altTokensCheck and throw in case of mismatch
-  // TODO
+  // Ensure that alt context still starts with base tokens
+  if (!altTokensCheck.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])) {
+    throw new Error("Alt context token mismatch with base token prefix.");
+  }
 
-  for (let au = 0; au < alphaUpper.length; au++) {
-    for (let al = 0; al < alphaLower.length; al++) {
-      const identifierPrefix = alphaUpper[au] + alphaLower[al];
-      
-      const baseTokenRef = tokenize(tokenizer, baseText + ' ' + prefix + identifierPrefix); // Add whitespace
-      const altTokenRef = tokenize(tokenizer, baseText + altContexts[0].prefix + prefix + identifierPrefix); // Use prefix
+  const result = {};
 
-      // Ensure baseTokenRef starts with baseTokens and continues with one token only,
-      // same for altTokenRef, otherwise skip this prefix
-      // TODO
+  // Iterate over all possible two-letter starters (Aa, Ab, ..., Zz)
+  for (let au of alphaUpper) {
+    for (let al of alphaLower) {
+      const starter = au + al;
+      if (banned[starter]) continue;
 
-      const baseToken = baseTokenRef[baseTokenRef.length - 1];
-      const altToken = altTokenRef[altTokenRef.length - 1];
-      const validSuffixes = [];
-      if (!banned[identifierPrefix]) {
-        for (let sn = 0; sn < numeric.length; sn++) {
-          for (let sa = 0; sa < alphaLower.length; sa++) {
-            const identifierSuffix = sn + sa;
-            const identifer = identifierPrefix + identifierSuffix;
-            
-            const baseTokenFullRef = tokenize(tokenizer, baseText + ' ' + prefix + identifier);
-            const altTokenFullRef = tokenize(tokenizer, baseText + altContexts[0].prefix + prefix + identifier);
+      // Tokenize prefix + starter in both base and alt punctuation contexts
+      const testBase = tokenize(tokenizer, `${baseText} ${prefix}${starter}`);
+      const testAlt = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}${starter}`);
 
-            // Ensure baseTokenFullRef starts with baseTokenRef, and continues with two tokens only,
-            // same for altTokenFullRef, otherwise skip this suffix
-            // TODO
+      // Ensure both tokenize to exactly 1 token after base, and match base
+      if (
+        testBase.length !== baseTokens.length + 1 ||
+        testAlt.length !== baseTokens.length + 1 ||
+        !testBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i]) ||
+        !testAlt.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
+      ) {
+        continue;
+      }
 
-            // Extract the three tokens from baseTokenFullRef
-            // and the three from altTokenFullRef
-            // TODO
+      const baseStarterToken = testBase.at(-1);
+      const altStarterToken = testAlt.at(-1);
 
-            // Loop through all baseContexts test cases (surrounding the identifier with prefix and suffix)
-            // Ensure we can find the token triple, otherwise skip this whole suffix
-            // TODO
+      const suffixes = [];
 
-            // Loop through all altContexts test cases, same thing
-            // TODO
+      // Test all digit+lowercase combos (e.g. 0a, 1b, ..., 9z)
+      for (let digit of numeric) {
+        for (let lower of alphaLower) {
+          const fullId = starter + digit + lower;
+
+          const fullBase = tokenize(tokenizer, `${baseText} ${prefix}${fullId}`);
+          const fullAlt = tokenize(tokenizer, `${baseText}${altContexts[0].prefix}${prefix}${fullId}`);
+
+          const expectedLen = baseTokens.length + 2;
+          if (
+            fullBase.length !== expectedLen ||
+            fullAlt.length !== expectedLen ||
+            !fullBase.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i]) ||
+            !fullAlt.slice(0, baseTokens.length).every((t, i) => t === baseTokens[i])
+          ) {
+            continue;
+          }
+
+          // Extract and verify token triplets
+          const tripleBase = fullBase.slice(-3);
+          const tripleAlt = fullAlt.slice(-3);
+
+          // The starter tokens in both contexts must match previously observed tokens
+          if (
+            tripleBase[0] !== baseStarterToken ||
+            tripleAlt[0] !== altStarterToken
+          ) {
+            continue;
+          }
+
+          // Verify stability across all test contexts
+          let valid = true;
+          for (const ctx of [...baseContexts, ...altContexts]) {
+            const contextTokens = tokenize(tokenizer, `${baseText}${ctx.prefix}${prefix}${fullId}${ctx.suffix}`);
+            const triplet = contextTokens.slice(-3);
+            if (
+              triplet.length !== 3 ||
+              triplet[0] !== baseStarterToken ||
+              triplet[1] !== tripleBase[1] ||
+              triplet[2] !== tripleBase[2]
+            ) {
+              valid = false;
+              break;
+            }
+          }
+
+          if (valid) {
+            suffixes.push(digit + lower);
           }
         }
       }
+
+      if (suffixes.length > 0) {
+        result[prefix + starter] = suffixes;
+      }
     }
   }
+
+  return result;
 }
 
 /* end of file */
