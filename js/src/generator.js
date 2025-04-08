@@ -28,6 +28,7 @@ const baseContexts = [
 const altContexts = [
   { prefix: ' @', suffix: '' },
   { prefix: ' #', suffix: '' },
+  { prefix: ' ,', suffix: '' },
   { prefix: ' "', suffix: '"' },
   { prefix: " '", suffix: "'" },
   { prefix: " (", suffix: ")" },
@@ -35,6 +36,9 @@ const altContexts = [
   { prefix: " [", suffix: "]" },
   { prefix: " {", suffix: "}" },
   { prefix: " -", suffix: "-" },
+  { prefix: "Aa0a,", suffix: "-" },
+  { prefix: "Aa0a-", suffix: "-" },
+  { prefix: "Aa0a_", suffix: "-" },
 ];
 
 // Two-letter English words and pronoun-like starters to avoid
