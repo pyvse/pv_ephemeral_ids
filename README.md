@@ -17,7 +17,7 @@ This library provides a compact, tokenizer-friendly ID scheme designed for ephem
 - **Fairly distributed**, reducing model bias
 - **Distinct** in both token and text space, ensuring clarity and stability in prompts
 
-Whether you're replacing verbose identifiers in training data, assigning temporary message IDs in a dialogue system, or just need something better than `"123456789012345678"` in your prompt, this generator gives you short, bias-resistant identifiers that work with the tokenizer, not against it—perfect for prompts, message tracking, or in-place substitutions.
+Whether you're replacing verbose identifiers in training data, assigning temporary message IDs in a dialogue system, or just need something better than `"123456789012345678"` in your prompt, this generator gives you short, bias-resistant IDs that work with the tokenizer—not against it.
 
 ## Installation
 
