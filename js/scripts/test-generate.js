@@ -8,7 +8,7 @@ const MODEL = 'deepseek-ai/DeepSeek-V3-Base';
 
 console.log(`Testing ID generation with model: ${MODEL}`);
 
-const result = await generateIdMap(MODEL, { prefix: 'Id', long: false });
+const result = await generateIdMap(MODEL, { prefix: '', long: false });
 
 // Print the number of valid starters and a preview
 const starters = Object.keys(result);
