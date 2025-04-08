@@ -91,6 +91,11 @@ export async function generateIdMap(modelRepo, { prefix = '' } = {}) {
       const baseStarterToken = testBase.at(-1);
       const altStarterToken = testAlt.at(-1);
 
+      // If we have a prefix, then these should be identical
+      if (prefix.length && baseStarterToken !== altStarterToken) {
+        continue;
+      }
+
       const suffixes = [];
 
       // Test all digit+lowercase combos (e.g. 0a, 1b, ..., 9z)
