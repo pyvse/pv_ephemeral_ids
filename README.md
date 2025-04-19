@@ -22,7 +22,7 @@ Whether you're replacing verbose identifiers in training data, assigning tempora
 ## Installation
 
 ```bash
-npm install 'github:kaetemi/pv_ephemeral_ids#HEAD:js'
+npm install github:pyvse/pv_ephemeral_ids#HEAD --save
 ```
 
 ## Design Goal
