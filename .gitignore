@@ -7,16 +7,16 @@
 *.bak
 
 # Node.js
-js/node_modules/
-js/.npm/
-js/.eslintcache
-js/coverage/
-js/dist/
-js/build/
-js/package-lock.json
-js/README.md
-js/scripts/id_map.txt
-js/.cache/
+node_modules/
+.npm/
+.eslintcache
+coverage/
+dist/
+build/
+package-lock.json
+README.md
+scripts/id_map.txt
+.cache/
 
 # Python
 py/__pycache__/
