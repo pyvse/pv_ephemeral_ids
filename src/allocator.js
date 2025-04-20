@@ -19,6 +19,14 @@ export class EphemeralIds {
     this.starterLength = this.starters[0].length;
   }
 
+  /**
+   * Creates a new EphemeralIds instance using the same idMap, with fresh state.
+   * @returns {EphemeralIds}
+   */
+  spawn() {
+    return new EphemeralIds(this.idMap);
+  }
+
   reset() {
     // Create an array of all the available starter tokens
     this.starters = [...Object.keys(this.idMap)];
@@ -29,6 +37,22 @@ export class EphemeralIds {
 
     // Remapped user identifiers to ephemeral identifiers
     this.remapped = new Map();
+  }
+
+  /**
+   * Returns the maximum number of unique ephemeral identifiers that can exist simultaneously.
+   * @returns {number}
+   */
+  limit() {
+    return Object.keys(this.idMap).length;
+  }
+
+  /**
+   * Returns the number of currently active ephemeral identifiers.
+   * @returns {number}
+   */
+  usage() {
+    return this.activeIds.size;
   }
 
   /**
