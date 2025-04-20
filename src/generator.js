@@ -1,7 +1,7 @@
 /* js/src/generator.js */
 
 const DEBUG_LOG = false;
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 import { AutoTokenizer } from '@huggingface/transformers';
 
@@ -105,7 +105,11 @@ const banned = {
   "Hhh": true, "Iii": true, "Jjj": true, "Kkk": true, "Lll": true, "Mmm": true, "Nnn": true,
   "Ooo": true, "Ppp": true, "Qqq": true, "Rrr": true, "Sss": true, "Ttt": true, "Uuu": true,
   "Vvv": true, "Www": true, "Xxx": true, "Yyy": true, "Zzz": true,
-  // ...
+  "Not": true, "Non": true, "Yes": true, "Oui": true, "Out": true, "Msg": true, "For": true,
+  "The": true, "And": true, "Are": true, "But": true, "You": true, "All": true, "Any": true,
+  "His": true, "Him": true, "Her": true, "Was": true, "One": true, "Two": true, "Six": true,
+  "Ten": true, "Get": true, "Our": true, "Has": true, "Its": true, "Who": true, "Why": true,
+  "How": true, "Let": true, "Now": true, "See": true,
 };
 
 // Alphabet and numeric components
